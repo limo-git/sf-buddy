@@ -6,6 +6,7 @@ from routes.sample_get import router as sample_get
 from routes.upload import router as upload_router
 from routes.learn import router as learn_router
 from routes.ask import router as ask_router
+from routes.docs import router as docs_router
 from pydantic import BaseModel
 from typing import List
     
@@ -29,5 +30,6 @@ app.include_router(sample_get)
 app.include_router(upload_router, prefix="/upload")
 app.include_router(learn_router, prefix="/learn")
 app.include_router(ask_router, prefix="/ask")
+app.include_router(docs_router, prefix="/docs")
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8080)
