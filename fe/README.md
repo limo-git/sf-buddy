@@ -1,3 +1,9 @@
+first setup the env
+$env:NODE_OPTIONS="--loader ts-node/esm"
+
+then run the server
+npx ts-node server.mts
+
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
