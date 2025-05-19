@@ -10,3 +10,13 @@ def summarize_chunk(chunk_text: str) -> str:
     prompt = f"Summarize this document chunk in 3–4 sentences:\n\n{chunk_text}"
     response = model.generate_content(prompt)
     return response.text
+
+def answer_question(question: str, context_chunks: list[str]) -> str:
+    context = "\n---\n".join(context_chunks)
+    prompt = f"""
+        Context: {context}
+        
+        Answer the question: "{question}"
+    """
+    response = model.generate_content(prompt)
+    return response.text

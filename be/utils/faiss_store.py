@@ -23,3 +23,9 @@ def load_faiss_index(doc_name):
     with open(os.path.join(FAISS_DIR, f"{doc_name}.pkl"), "rb") as f:
         texts = pickle.load(f)
     return index, texts
+
+def search_similar_chunks(query_vector, doc_name, top_k=3):
+    index, texts = load_faiss_index(doc_name)
+    D, I = index.search(np.array([query_vector]).astype('float32'), top_k)
+    return [texts[i] for i in I[0] if i < len(texts)]
+
