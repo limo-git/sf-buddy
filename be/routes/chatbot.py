@@ -9,7 +9,7 @@ load_dotenv()
 router = APIRouter()
 
 # Configure the Gemini API with the API key from the environment
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
 class ChatRequest(BaseModel):
     message: str

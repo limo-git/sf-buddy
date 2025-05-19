@@ -173,39 +173,64 @@ export default function Chatbot(): React.JSX.Element {
     <div className="flex h-screen bg-[#1e1e20] text-white">
       {/* Sidebar */}
       <aside className="w-64 p-4 border-r border-gray-700 bg-[#2b2b2e] flex flex-col gap-6">
+        {/* General Chat */}
         <div>
           <button
             onClick={() => router.push("/chatbot")}
-            className={`text-white hover:text-blue-400 text-lg font-semibold mb-4 block ${!currentDoc && "text-blue-400"}`}
+            className={`w-full text-left px-3 py-2 mb-4 rounded-md text-white hover:bg-gray-800 hover:text-blue-400 text-sm font-medium ${
+              !currentDoc ? "bg-gray-800 text-blue-400 font-semibold" : ""
+            }`}
           >
             🌐 General Chat
           </button>
-          <div className="text-sm text-gray-400 mb-2 font-bold">📁 Your Documents</div>
-          <div className="flex flex-col gap-2 overflow-y-auto">
-            {docs.map(doc => (
-              <button
-                key={doc}
-                className={`text-left text-sm hover:text-blue-300 truncate ${currentDoc === doc && "text-blue-400"}`}
-                onClick={() => router.push(`/chatbot?doc=${encodeURIComponent(doc)}`)}
-              >
-                {doc.split("_").slice(1).join("_")}
-              </button>
-            ))}
+
+          <div className="text-xs text-gray-400 mb-2 font-semibold">📁 Your Documents</div>
+
+          {/* Document List */}
+          <div className="flex flex-col gap-1 overflow-y-auto max-h-[calc(100vh-300px)] pr-1">
+            {docs.map(doc => {
+              const isActive = currentDoc === doc
+              const displayName = doc.split("_").slice(1).join("_")
+
+              return (
+                <div
+                  key={doc}
+                  className={`group flex items-center justify-between px-3 py-2 rounded-md transition-all ${
+                    isActive
+                      ? "bg-gray-800 text-gray-300 font-semibold"
+                      : "text-gray-300 hover:bg-gray-800"
+                  }`}
+                >
+                  <button
+                    className="truncate text-sm flex-1 text-left"
+                    onClick={() => router.push(`/chatbot?doc=${encodeURIComponent(doc)}`)}
+                    title={displayName}
+                  >
+                    {displayName}
+                  </button>
+                  <button
+                    onClick={() => {
+                      localStorage.removeItem(`chat_history_${doc}`)
+                      if (currentDoc === doc) setMessages([])
+                    }}
+                    className="invisible group-hover:visible text-gray-500 hover:text-red-500 transition"
+                    title="Clear chat"
+                  >
+                    <Trash className="w-4 h-4" />
+                  </button>
+                </div>
+              )
+            })}
           </div>
         </div>
+
+        {/* Upload */}
         <div className="mt-auto flex flex-col gap-3">
-          <label className="cursor-pointer flex items-center gap-2 text-sm hover:text-green-400">
+          <label className="cursor-pointer flex items-center gap-2 text-sm text-gray-300 hover:text-green-400">
             <FilePlus className="w-4 h-4" />
             Upload New Document
             <input type="file" accept="application/pdf" onChange={handleUpload} className="hidden" />
           </label>
-          <button
-            onClick={handleClearChat}
-            className="flex items-center gap-2 text-sm text-red-500 hover:text-red-400"
-          >
-            <Trash className="w-4 h-4" />
-            Clear Current Chat
-          </button>
         </div>
       </aside>
 
@@ -213,7 +238,7 @@ export default function Chatbot(): React.JSX.Element {
       <div className="flex-1 flex flex-col">
         <div className="border-b border-gray-700 px-6 py-4 bg-[#2a2a2e] text-lg font-bold flex items-center gap-2">
           <Bot className="w-5 h-5" />
-          {currentDoc ? `Chat - ${currentDoc.split("_").slice(1).join("_")}` : "AI Assistant"}
+          {currentDoc ? `AI Assstant - ${currentDoc.split("_").slice(1).join("_")}` : "AI Assistant"}
         </div>
 
         {/* Messages */}
