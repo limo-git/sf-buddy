@@ -26,6 +26,8 @@ export default function Chatbot(): React.JSX.Element {
   const [totalSteps, setTotalSteps] = useState(0)
   const [visitedSteps, setVisitedSteps] = useState<number[]>([])
   const [isChunkLoading, setIsChunkLoading] = useState(false)
+  const [showChunkBar, setShowChunkBar] = useState(true)
+
 
   useEffect(() => {
   if (!currentDoc) return
@@ -36,6 +38,8 @@ export default function Chatbot(): React.JSX.Element {
         setTotalSteps(res.data.total_steps)
       })
   }, [currentDoc])
+
+
 
 
   const getStorageKey = () =>
@@ -288,35 +292,46 @@ export default function Chatbot(): React.JSX.Element {
             </div>
           )}
         </div>
-
-        {currentDoc && (
-          <div className="flex items-center justify-between px-6 py-2 bg-[#2a2a2e] border-t border-b border-gray-700 text-sm">
-            <div className="flex gap-1 overflow-x-auto">
-              {Array.from({ length: totalSteps }, (_, i) => (
-                <button
-                  key={i}
-                  onClick={() => fetchChunk(i)}
-                  className={`px-2 py-1 rounded-md border text-xs ${
-                    currentStep === i
-                      ? "bg-blue-600 text-white"
-                      : visitedSteps.includes(i)
-                      ? "bg-gray-600 text-white"
-                      : "bg-gray-800 text-gray-400 hover:bg-gray-700"
-                  }`}
-                >
-                  {i + 1}
-                </button>
-              ))}
+        
+        {showChunkBar && currentDoc && (
+          <div className="bg-[#2a2a2e] border-t border-b border-gray-700 text-sm px-6 py-2">
+            <div className="w-full overflow-x-auto">
+              <div className="flex space-x-2 w-max">
+                {Array.from({ length: totalSteps }).map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => fetchChunk(i)}
+                    disabled={isChunkLoading || isLoading}
+                    className={`px-3 py-1 rounded-md border text-xs truncate max-w-[160px] ${
+                      currentStep === i
+                        ? "bg-blue-600 text-white"
+                        : visitedSteps.includes(i)
+                        ? "bg-gray-600 text-white"
+                        : "bg-gray-800 text-gray-400 hover:bg-gray-700"
+                    }`}
+                  >
+                    {i + 1}
+                  </button>
+                ))}
+              </div>
             </div>
-            <button
-              disabled={(currentStep >= totalSteps - 1) || isChunkLoading || isLoading}
-              onClick={() => fetchChunk(currentStep + 1)}
-              className="text-blue-400 text-xs hover:underline disabled:text-gray-500"
-            >
-              ▶️ Next Chunk
-            </button>
+            <div className="flex justify-end mt-2">
+              <button
+                onClick={() => setShowChunkBar(false)}
+                className="text-xs text-gray-400 hover:text-blue-400"
+              >
+                Hide
+              </button>
+            </div>
           </div>
         )}
+
+        {!showChunkBar && currentDoc && (
+          <div className="px-6 py-2 text-sm text-gray-400">
+            <button onClick={() => setShowChunkBar(true)} className="hover:text-blue-400 underline">Show Chunk Navigator</button>
+          </div>
+        )}
+
 
         {/* Input */}
         <div className="border-t border-gray-700 bg-[#2a2a2e] p-4">
