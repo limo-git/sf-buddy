@@ -40,3 +40,6 @@ coverage.xml
 
 # FastAPI OpenAPI docs cache (if generated)
 openapi.json
+
+documents/
+faiss_data/
