@@ -22,6 +22,21 @@ export default function Chatbot(): React.JSX.Element {
   const router = useRouter()
   const params = useSearchParams()
   const currentDoc = params.get("doc")
+  const [currentStep, setCurrentStep] = useState(0)
+  const [totalSteps, setTotalSteps] = useState(0)
+  const [visitedSteps, setVisitedSteps] = useState<number[]>([])
+  const [isChunkLoading, setIsChunkLoading] = useState(false)
+
+  useEffect(() => {
+  if (!currentDoc) return
+
+    axios
+      .get(`http://localhost:8000/doc/count/steps_count?doc_name=${currentDoc}`)
+      .then(res => {
+        setTotalSteps(res.data.total_steps)
+      })
+  }, [currentDoc])
+
 
   const getStorageKey = () =>
     currentDoc ? `chat_history_${currentDoc}` : `chat_history_default`
@@ -54,8 +69,11 @@ export default function Chatbot(): React.JSX.Element {
   }, [])
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }, [messages])
+    if (isLoading || isChunkLoading || messages.length > 0) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+    }
+  }, [messages, isLoading, isChunkLoading])
+
 
   const sendMessage = async () => {
     if (!input.trim()) return
@@ -79,11 +97,36 @@ export default function Chatbot(): React.JSX.Element {
         setMessages(prev => [...prev, { role: "assistant", content: res.data.response }])
       }
     } catch {
-      setMessages(prev => [...prev, { role: "assistant", content: "⚠️ Failed to get response." }])
+      setMessages(prev => [...prev, { role: "assistant", content: "Failed to get response :(" }])
     } finally {
       setIsLoading(false)
     }
   }
+
+  const fetchChunk = async (step: number) => {
+    if (!currentDoc || isChunkLoading) return
+    setIsChunkLoading(true)
+    try {
+      const res = await axios.get(
+        `http://localhost:8000/learn/?doc_name=${currentDoc}&step=${step}`
+      )
+      const summary = res.data.summary
+      setMessages(prev => [
+        ...prev,
+        { role: "assistant", content: `🧾 Summary of chunk ${step + 1}:\n\n${summary}` },
+      ])
+      setCurrentStep(step)
+      setVisitedSteps(prev => (prev.includes(step) ? prev : [...prev, step]))
+    } catch {
+      setMessages(prev => [
+        ...prev,
+        { role: "assistant", content: `⚠️ Failed to load chunk ${step + 1}` },
+      ])
+    } finally {
+      setIsChunkLoading(false)
+    }
+  }
+
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -237,7 +280,7 @@ export default function Chatbot(): React.JSX.Element {
             </div>
           ))}
           <div ref={messagesEndRef} />
-          {isLoading && (
+          {(isLoading || isChunkLoading) && (
             <div className="w-full max-w-2xl flex justify-start">
               <div className="bg-gray-700 rounded-md px-4 py-2 text-sm text-white">
                 <LoadingDots />
@@ -245,6 +288,35 @@ export default function Chatbot(): React.JSX.Element {
             </div>
           )}
         </div>
+
+        {currentDoc && (
+          <div className="flex items-center justify-between px-6 py-2 bg-[#2a2a2e] border-t border-b border-gray-700 text-sm">
+            <div className="flex gap-1 overflow-x-auto">
+              {Array.from({ length: totalSteps }, (_, i) => (
+                <button
+                  key={i}
+                  onClick={() => fetchChunk(i)}
+                  className={`px-2 py-1 rounded-md border text-xs ${
+                    currentStep === i
+                      ? "bg-blue-600 text-white"
+                      : visitedSteps.includes(i)
+                      ? "bg-gray-600 text-white"
+                      : "bg-gray-800 text-gray-400 hover:bg-gray-700"
+                  }`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+            </div>
+            <button
+              disabled={(currentStep >= totalSteps - 1) || isChunkLoading || isLoading}
+              onClick={() => fetchChunk(currentStep + 1)}
+              className="text-blue-400 text-xs hover:underline disabled:text-gray-500"
+            >
+              ▶️ Next Chunk
+            </button>
+          </div>
+        )}
 
         {/* Input */}
         <div className="border-t border-gray-700 bg-[#2a2a2e] p-4">
@@ -256,7 +328,7 @@ export default function Chatbot(): React.JSX.Element {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              disabled={isLoading}
+              disabled={isChunkLoading || isLoading}
             />
             <button
               onClick={sendMessage}
