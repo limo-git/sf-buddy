@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useRef, useEffect, useState } from "react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -9,10 +8,12 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Send, Bot, User } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 interface Message {
   role: "user" | "assistant"
   content: string
+  wantsHuman?: boolean
 }
 
 export default function ChatBot() {
@@ -20,6 +21,7 @@ export default function ChatBot() {
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const router = useRouter()
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -42,6 +44,8 @@ export default function ChatBot() {
     setInput("")
     setIsLoading(true)
 
+    const wantsHuman = input.toLowerCase().includes("i want to talk to a human")
+
     try {
       const response = await fetch("/api/chatbot", {
         method: "POST",
@@ -59,6 +63,7 @@ export default function ChatBot() {
       const assistantMessage: Message = {
         role: "assistant",
         content: data.response || data.text || "Sorry, I couldn't process that.",
+        wantsHuman,
       }
 
       setMessages((prev) => [...prev, assistantMessage])
@@ -114,6 +119,16 @@ export default function ChatBot() {
                       }`}
                     >
                       <div className="whitespace-pre-wrap">{message.content}</div>
+
+                      {message.role === "assistant" && message.wantsHuman && (
+                        <Button
+                          variant="outline"
+                          className="mt-2 text-sm"
+                          onClick={() => router.push("/tutor-chat")}
+                        >
+                          Connect to Human Tutor
+                        </Button>
+                      )}
                     </div>
 
                     {message.role === "user" && (
