@@ -53,7 +53,10 @@ export default function Chatbot(): React.JSX.Element {
   const [visitedSteps, setVisitedSteps] = useState<number[]>([])
   const [isChunkLoading, setIsChunkLoading] = useState(false)
   const [showChunkBar, setShowChunkBar] = useState(true)
-  const [selectedLanguage, setSelectedLanguage] = useState("en")
+  const [selectedLanguage, setSelectedLanguage] = useState("english")
+  const [isStarting, setIsStarting] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
+
 
 
 
@@ -69,9 +72,16 @@ export default function Chatbot(): React.JSX.Element {
 
 
   const startAssessment = async () => {
-    const res = await axios.get(`http://localhost:8080/assessment/generate_question?doc_name=${currentDoc}`)
-    sessionStorage.setItem("mcqs", JSON.stringify(res.data.questions))
-    router.push("/assessment")
+    setIsStarting(true)
+    try {
+      const res = await axios.get(`http://localhost:8080/assessment/generate_question?doc_name=${currentDoc}`)
+      sessionStorage.setItem("mcqs", JSON.stringify(res.data.questions))
+      router.push("/assessment")
+    } catch(err) {
+      console.log(err)
+    } finally {
+      setIsStarting(false);
+    }
   }
 
 
@@ -179,16 +189,23 @@ export default function Chatbot(): React.JSX.Element {
     const file = e.target.files?.[0]
     if (!file) return
 
-    const formData = new FormData()
-    formData.append("file", file)
+    setIsUploading(true)
+    try {
+      const formData = new FormData()
+      formData.append("file", file)
 
-    const res = await axios.post("http://localhost:8080/upload/", formData)
-    const newDoc = res.data.filename
+      const res = await axios.post("http://localhost:8080/upload/", formData)
+      const newDoc = res.data.filename
 
-    const updated = [...docs, newDoc]
-    setDocs(updated)
-    localStorage.setItem("docChats", JSON.stringify(updated))
-    router.push(`/chatbot?doc=${encodeURIComponent(newDoc)}`)
+      const updated = [...docs, newDoc]
+      setDocs(updated)
+      localStorage.setItem("docChats", JSON.stringify(updated))
+      router.push(`/chatbot?doc=${encodeURIComponent(newDoc)}`)
+    } catch (err) {
+      console.error("Upload failed:", err)
+    } finally {
+      setIsUploading(false)
+    }
   }
 
   const handleClearChat = () => {
@@ -265,9 +282,21 @@ export default function Chatbot(): React.JSX.Element {
 
         {/* Upload */}
         <div className="mt-auto flex flex-col gap-3">
-          <label className="cursor-pointer flex items-center gap-2 text-sm text-gray-300 hover:text-green-400">
-            <FilePlus className="w-4 h-4" />
-            Upload New Document
+          <label className={`cursor-pointer flex items-center gap-2 text-sm ${isUploading ? "text-gray-400" : "text-gray-300 hover:text-green-400"}`}>
+            {isUploading ? (
+              <>
+                <svg className="animate-spin h-4 w-4 text-green-500" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+                Uploading...
+              </>
+            ) : (
+              <>
+                <FilePlus className="w-4 h-4" />
+                Upload New Document
+              </>
+            )}
             <input type="file" accept="application/pdf" onChange={handleUpload} className="hidden" />
           </label>
         </div>
@@ -285,9 +314,22 @@ export default function Chatbot(): React.JSX.Element {
           {currentDoc && (
             <button
               onClick={startAssessment}
-              className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-1.5 rounded text-sm"
+              disabled={isStarting}
+              className={`flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-4 py-1.5 rounded text-sm ${isStarting ? "opacity-70 cursor-not-allowed" : ""}`}
             >
-              📝 Start Assessment
+              {isStarting ? (
+                <>
+                  <svg className="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="white" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="white" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Generating...
+                </>
+              ) : (
+                <>
+                  📝 Start Assessment
+                </>
+              )}
             </button>
           )}
         </div>
