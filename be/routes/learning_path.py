@@ -11,8 +11,8 @@ router = APIRouter()
 @router.post("/generate_learning_path")
 async def generate_learning_path(
     filename: str = Form(...),
-    strengths: str = Form(...),
-    weaknesses: str = Form(...),
+    # strengths: str = Form(...),
+    # weaknesses: str = Form(...),
     available_days: str = Form(...), 
     hours_per_day: int = Form(...),
     total_days: int = Form(...)
@@ -26,8 +26,8 @@ async def generate_learning_path(
 
         prompt = build_learning_path_prompt(
             full_text=full_text,
-            strengths=strengths,
-            weaknesses=weaknesses,
+            # strengths=strengths,
+            # weaknesses=weaknesses,
             available_days=available_days,
             hours_per_day=hours_per_day,
             total_days=total_days,

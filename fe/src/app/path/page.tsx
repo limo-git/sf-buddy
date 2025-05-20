@@ -1,21 +1,18 @@
 "use client"
 
-import type React from "react"
-
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Loader2, Upload, FileText, Clock, Calendar } from "lucide-react"
 import { Slider } from "@/components/ui/slider"
+import ReactMarkdown from "react-markdown"
+
 
 export default function LearningPathForm() {
   const [file, setFile] = useState<File | null>(null)
   const [uploadedFilename, setUploadedFilename] = useState<string | null>(null)
-  const [strengths, setStrengths] = useState("")
-  const [weaknesses, setWeaknesses] = useState("")
   const [availableDays, setAvailableDays] = useState("")
   const [hoursPerDay, setHoursPerDay] = useState(1)
   const [totalDays, setTotalDays] = useState(1)
@@ -64,16 +61,12 @@ export default function LearningPathForm() {
     setLoading(true)
 
     try {
-      // Create form data with all the form values
       const formData = new FormData()
       formData.append("filename", uploadedFilename)
-      formData.append("strengths", strengths)
-      formData.append("weaknesses", weaknesses)
       formData.append("available_days", availableDays)
       formData.append("hours_per_day", hoursPerDay.toString())
       formData.append("total_days", totalDays.toString())
 
-      // Send request to the specified endpoint
       const res = await fetch("http://localhost:8080/path/generate_learning_path", {
         method: "POST",
         body: formData,
@@ -84,7 +77,10 @@ export default function LearningPathForm() {
       }
 
       const data = await res.json()
-      setResponse(data)
+      console.log("API Response:", data) 
+      setResponse(data.learning_path)
+      console.log("Learning path text:", response)
+
     } catch (error) {
       console.error("API request failed:", error)
       setResponse({ error: "Failed to generate learning path. Please try again." })
@@ -93,13 +89,14 @@ export default function LearningPathForm() {
     }
   }
 
+
   return (
     <div className="container mx-auto py-10 px-4">
-      <Card className="max-w-3xl mx-auto">
+      <Card className="max-w-4xl mx-auto">
         <CardHeader>
           <CardTitle className="text-2xl font-bold">Personalized Learning Path Generator</CardTitle>
           <CardDescription>
-            Upload your PDF and provide some information to get a customized learning path
+            Upload your PDF and set your schedule to get a customized learning path
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -134,36 +131,8 @@ export default function LearningPathForm() {
                 )}
               </div>
               {uploadedFilename && (
-                <p className="text-sm text-green-600">✓ File uploaded successfully: {uploadedFilename}</p>
+                <p className="text-sm text-green-600">✓ File uploaded successfully</p>
               )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="strengths" className="font-medium">
-                Your Strengths
-              </Label>
-              <Textarea
-                id="strengths"
-                placeholder="List your strengths (comma separated or description)"
-                value={strengths}
-                onChange={(e) => setStrengths(e.target.value)}
-                rows={3}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="weaknesses" className="font-medium">
-                Areas to Improve
-              </Label>
-              <Textarea
-                id="weaknesses"
-                placeholder="List areas you want to improve (comma separated or description)"
-                value={weaknesses}
-                onChange={(e) => setWeaknesses(e.target.value)}
-                rows={3}
-                required
-              />
             </div>
 
             <div className="space-y-2">
@@ -240,13 +209,61 @@ export default function LearningPathForm() {
             )}
           </Button>
 
-          {response && (
-            <div className="w-full mt-6 p-4 bg-slate-50 rounded-md">
-              <h3 className="font-medium mb-2">Generated Learning Path:</h3>
-              <pre className="text-sm overflow-auto p-2 bg-slate-100 rounded max-h-[300px]">
-                {JSON.stringify(response, null, 2)}
-              </pre>
-            </div>
+{response && (
+
+            <Card className="w-full mt-6">
+              <CardHeader>
+                <CardTitle>Your Personalized Learning Path</CardTitle>
+              </CardHeader>
+              <CardContent className="prose prose-sm max-w-none">
+                <div className="space-y-2 text-sm leading-relaxed">
+                  <ReactMarkdown   components={{
+                      p: ({ node, ...props }) => (
+                        <p className="mb-3 text-sm text-black leading-relaxed" {...props} />
+                      ),
+                      strong: ({ node, ...props }) => (
+                        <strong className="font-semibold text-blue-400" {...props} />
+                      ),
+                      em: ({ node, ...props }) => (
+                        <em className="italic text-black" {...props} />
+                      ),
+                      ul: ({ node, ...props }) => (
+                        <ul className="list-disc ml-6 space-y-1 text-sm text-black" {...props} />
+                      ),
+                      ol: ({ node, ...props }) => (
+                        <ol className="list-decimal ml-6 space-y-1 text-sm text-black" {...props} />
+                      ),
+                      li: ({ node, ...props }) => (
+                        <li className="text-sm leading-snug text-black" {...props} />
+                      ),
+                      a: ({ node, ...props }) => (
+                        <a className="text-blue-400 underline hover:text-blue-300" target="_blank" rel="noopener noreferrer" {...props} />
+                      ),
+                      blockquote: ({ node, ...props }) => (
+                        <blockquote className="border-l-4 border-blue-500 pl-4 italic text-black" {...props} />
+                      ),
+                      code: ({ node, ...props }) => (
+                        <code className="bg-gray-800 text-green-300 px-1 py-0.5 rounded text-xs" {...props} />
+                      ),
+                      pre: ({ node, ...props }) => (
+                        <pre className="bg-gray-900 text-white p-4 rounded-md overflow-x-auto text-sm my-4" {...props} />
+                      ),
+                      hr: () => (
+                        <hr className="my-4 border-gray-700" />
+                      ),
+                      h1: ({ node, ...props }) => (
+                        <h1 className="text-xl font-bold text-white my-4" {...props} />
+                      ),
+                      h2: ({ node, ...props }) => (
+                        <h2 className="text-lg font-semibold text-white my-3" {...props} />
+                      ),
+                      h3: ({ node, ...props }) => (
+                        <h3 className="text-base font-semibold text-black my-2" {...props} />
+                      ),
+                    }}>{response}</ReactMarkdown>
+                </div>
+              </CardContent>
+            </Card>
           )}
         </CardFooter>
       </Card>
