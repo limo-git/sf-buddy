@@ -13,6 +13,32 @@ interface Message {
   content: string
 }
 
+const languages = [
+  { code: "hi", name: "Hindi" },
+  { code: "bn", name: "Bengali" },
+  { code: "te", name: "Telugu" },
+  { code: "mr", name: "Marathi" },
+  { code: "ta", name: "Tamil" },
+  { code: "ur", name: "Urdu" },
+  { code: "gu", name: "Gujarati" },
+  { code: "kn", name: "Kannada" },
+  { code: "or", name: "Odia" },
+  { code: "ml", name: "Malayalam" },
+  { code: "pa", name: "Punjabi" },
+  { code: "as", name: "Assamese" },
+  { code: "ma", name: "Maithili" },
+  { code: "bh", name: "Bhojpuri" },
+  { code: "sd", name: "Sindhi" },
+  { code: "km", name: "Khmer" }, // Khmer is not Indian, might skip or replace with Konkani (kok)
+  { code: "kok", name: "Konkani" },
+  { code: "ne", name: "Nepali" },
+  { code: "sy", name: "Sanskrit" }, // Usually "sa" is Sanskrit code
+  { code: "sa", name: "Sanskrit" },
+  { code: "dog", name: "Dogri" },
+  { code: "lus", name: "Lushai" } // Lushai (Mizo) might be represented as "lus"
+]
+
+
 export default function Chatbot(): React.JSX.Element {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState("")
@@ -27,13 +53,15 @@ export default function Chatbot(): React.JSX.Element {
   const [visitedSteps, setVisitedSteps] = useState<number[]>([])
   const [isChunkLoading, setIsChunkLoading] = useState(false)
   const [showChunkBar, setShowChunkBar] = useState(true)
+  const [selectedLanguage, setSelectedLanguage] = useState("en")
+
 
 
   useEffect(() => {
   if (!currentDoc) return
 
     axios
-      .get(`http://localhost:8000/doc/count/steps_count?doc_name=${currentDoc}`)
+      .get(`http://localhost:8080/doc/count/steps_count?doc_name=${currentDoc}`)
       .then(res => {
         setTotalSteps(res.data.total_steps)
       })
@@ -65,12 +93,25 @@ export default function Chatbot(): React.JSX.Element {
     if (storedDocs) {
       setDocs(JSON.parse(storedDocs))
     } else {
-      axios.get("http://localhost:8000/docs/").then(res => {
+      axios.get("http://localhost:8080/docs/").then(res => {
         setDocs(res.data.documents)
         localStorage.setItem("docChats", JSON.stringify(res.data.documents))
       })
     }
   }, [])
+
+  useEffect(() => {
+  const interval = setInterval(() => {
+    axios.post("http://localhost:8080/save/save/", {
+      doc_name: currentDoc ?? "general",
+      messages,
+    })
+    .then(() => console.log("Chat saved"))
+    .catch((err) => console.error("Failed to save chat", err))
+  }, 60000)
+
+  return () => clearInterval(interval)
+}, [messages, currentDoc])
 
   useEffect(() => {
     if (isLoading || isChunkLoading || messages.length > 0) {
@@ -80,39 +121,42 @@ export default function Chatbot(): React.JSX.Element {
 
 
   const sendMessage = async () => {
-    if (!input.trim()) return
+  if (!input.trim()) return
 
-    const userMessage: Message = { role: "user", content: input }
-    setMessages(prev => [...prev, userMessage])
-    setInput("")
-    setIsLoading(true)
+  const userMessage: Message = { role: "user", content: input }
+  setMessages(prev => [...prev, userMessage])
+  setInput("")
+  setIsLoading(true)
 
-    try {
-      if (currentDoc) {
-        const res = await axios.post("http://localhost:8000/ask/", {
-          question: input,
-          doc_name: currentDoc,
-        })
-        setMessages(prev => [...prev, { role: "assistant", content: res.data.answer }])
-      } else {
-        const res = await axios.post("http://localhost:8000/chatbot/", {
-          query: input,
-        })
-        setMessages(prev => [...prev, { role: "assistant", content: res.data.response }])
-      }
-    } catch {
-      setMessages(prev => [...prev, { role: "assistant", content: "Failed to get response :(" }])
-    } finally {
-      setIsLoading(false)
+  try {
+    if (currentDoc) {
+      const res = await axios.post("http://localhost:8080/ask/", {
+        question: input,
+        doc_name: currentDoc,
+        language: selectedLanguage,  // <-- Add this line to send the selected language
+      })
+      setMessages(prev => [...prev, { role: "assistant", content: res.data.answer }])
+    } else {
+      const res = await axios.post("http://localhost:8080/chatbot/", {
+        query: input,
+        language: selectedLanguage,  // <-- Also here if needed
+      })
+      setMessages(prev => [...prev, { role: "assistant", content: res.data.response }])
     }
+  } catch {
+    setMessages(prev => [...prev, { role: "assistant", content: "Failed to get response :(" }])
+  } finally {
+    setIsLoading(false)
   }
+}
+
 
   const fetchChunk = async (step: number) => {
     if (!currentDoc || isChunkLoading) return
     setIsChunkLoading(true)
     try {
       const res = await axios.get(
-        `http://localhost:8000/learn/?doc_name=${currentDoc}&step=${step}`
+        `http://localhost:8080/learn/?doc_name=${currentDoc}&step=${step}`
       )
       const summary = res.data.summary
       setMessages(prev => [
@@ -146,7 +190,7 @@ export default function Chatbot(): React.JSX.Element {
     const formData = new FormData()
     formData.append("file", file)
 
-    const res = await axios.post("http://localhost:8000/upload/", formData)
+    const res = await axios.post("http://localhost:8080/upload/", formData)
     const newDoc = res.data.filename
 
     const updated = [...docs, newDoc]
@@ -193,6 +237,7 @@ export default function Chatbot(): React.JSX.Element {
               const displayName = doc.split("_").slice(1).join("_")
 
               return (
+                
                 <div
                   key={doc}
                   className={`group flex items-center justify-between px-3 py-2 rounded-md transition-all ${
@@ -201,6 +246,8 @@ export default function Chatbot(): React.JSX.Element {
                       : "text-gray-300 hover:bg-gray-800"
                   }`}
                 >
+                  
+
                   <button
                     className="truncate text-sm flex-1 text-left"
                     onClick={() => router.push(`/chatbot?doc=${encodeURIComponent(doc)}`)}
@@ -360,7 +407,9 @@ export default function Chatbot(): React.JSX.Element {
 
         {/* Input */}
         <div className="border-t border-gray-700 bg-[#2a2a2e] p-4">
+          
           <div className="flex items-center gap-2 max-w-3xl mx-auto w-full">
+            
             <input
               type="text"
               placeholder="Type your message..."
@@ -378,6 +427,20 @@ export default function Chatbot(): React.JSX.Element {
               <Send className="w-4 h-4" />
               Send
             </button>
+            <div className="mb-2 px-6 py-2 bg-[#2a2a2e] border-b border-gray-700 text-white flex items-center gap-2 max-w-3xl mx-auto">
+  <label htmlFor="language-select" className="text-sm font-medium">Translate to:</label>
+  <select
+    id="language-select"
+    className="bg-[#3a3a40] border border-gray-600 text-white rounded-md px-2 py-1"
+    value={selectedLanguage}
+    onChange={e => setSelectedLanguage(e.target.value)}
+  >
+    <option value="en">English (default)</option>
+    {languages.map(lang => (
+      <option key={lang.code} value={lang.code}>{lang.name}</option>
+    ))}
+  </select>
+</div>
           </div>
         </div>
       </div>

@@ -1,0 +1,16 @@
+{
+  "doc_name": "testdoc",
+  "messages": [
+    {
+      "sender": "user",
+      "content": "Hello!",
+      "timestamp": null
+    },
+    {
+      "sender": "bot",
+      "content": "Hi there!",
+      "timestamp": "2025-05-20T12:00:00Z"
+    }
+  ],
+  "saved_at": "2025-05-20T11:36:01.401604"
+}

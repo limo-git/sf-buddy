@@ -8,6 +8,8 @@ from routes.learn import router as learn_router
 from routes.ask import router as ask_router
 from routes.docs import router as docs_router
 from routes.steps_count import router as steps_count
+from routes.learning_path import router as generate_learning_path
+from routes.save_chat import router as save_chat
 from pydantic import BaseModel
 from typing import List
     
@@ -33,5 +35,7 @@ app.include_router(learn_router, prefix="/learn")
 app.include_router(ask_router, prefix="/ask")
 app.include_router(docs_router, prefix="/docs")
 app.include_router(steps_count, prefix="/doc/count")
+app.include_router(generate_learning_path, prefix="/path")
+app.include_router(save_chat, prefix="/save")
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8080)

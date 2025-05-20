@@ -11,12 +11,19 @@ def summarize_chunk(chunk_text: str) -> str:
     response = model.generate_content(prompt)
     return response.text
 
-def answer_question(question: str, context_chunks: list[str]) -> str:
+def answer_question(question: str, context_chunks: list[str], language: str) -> str:
     context = "\n---\n".join(context_chunks)
     prompt = f"""
         Context: {context}
         
         Answer the question: "{question}"
+        Please provide the answer in {language}.
     """
+    response = model.generate_content(prompt)
+    return response.text
+
+
+async def call_gemini_api(prompt: str) -> str:
+
     response = model.generate_content(prompt)
     return response.text

@@ -6,11 +6,10 @@ from utils.gemini_client import answer_question
 
 router = APIRouter()
 
-
 class AskInput(BaseModel):
     question: str
     doc_name: str
-
+    language: str  # language is received here
 
 @router.post("/")
 async def ask(input: AskInput):
@@ -20,5 +19,6 @@ async def ask(input: AskInput):
     if not top_chunks:
         return {"answer": "No relevant content found."}
 
-    answer = answer_question(input.question, top_chunks)
+
+    answer = answer_question(input.question, top_chunks, input.language)  
     return {"answer": answer}
