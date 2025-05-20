@@ -14,28 +14,28 @@ interface Message {
 }
 
 const languages = [
-  { code: "hi", name: "Hindi" },
-  { code: "bn", name: "Bengali" },
-  { code: "te", name: "Telugu" },
-  { code: "mr", name: "Marathi" },
-  { code: "ta", name: "Tamil" },
-  { code: "ur", name: "Urdu" },
-  { code: "gu", name: "Gujarati" },
-  { code: "kn", name: "Kannada" },
-  { code: "or", name: "Odia" },
-  { code: "ml", name: "Malayalam" },
-  { code: "pa", name: "Punjabi" },
-  { code: "as", name: "Assamese" },
-  { code: "ma", name: "Maithili" },
-  { code: "bh", name: "Bhojpuri" },
-  { code: "sd", name: "Sindhi" },
-  { code: "km", name: "Khmer" }, // Khmer is not Indian, might skip or replace with Konkani (kok)
-  { code: "kok", name: "Konkani" },
-  { code: "ne", name: "Nepali" },
-  { code: "sy", name: "Sanskrit" }, // Usually "sa" is Sanskrit code
-  { code: "sa", name: "Sanskrit" },
-  { code: "dog", name: "Dogri" },
-  { code: "lus", name: "Lushai" } // Lushai (Mizo) might be represented as "lus"
+  { code: "hindi", name: "hindi" },
+  { code: "bengali", name: "bengali" },
+  { code: "telugu", name: "telugu" },
+  { code: "marathi", name: "marathi" },
+  { code: "tamil", name: "tamil" },
+  { code: "urdu", name: "urdu" },
+  { code: "gujarati", name: "gujarati" },
+  { code: "kannada", name: "kannada" },
+  { code: "odia", name: "odia" },
+  { code: "malayalam", name: "malayalam" },
+  { code: "punjabi", name: "punjabi" },
+  { code: "assamese", name: "assamese" },
+  { code: "maithili", name: "maithili" },
+  { code: "bhojpuri", name: "bhojpuri" },
+  { code: "sindhi", name: "sindhi" },
+  { code: "khmer", name: "khmer" },
+  { code: "konkani", name: "konkani" },
+  { code: "nepali", name: "nepali" },
+  { code: "sanskrit", name: "sanskrit" },
+  { code: "sanskrit", name: "sanskrit" },
+  { code: "dogri", name: "dogri" },
+  { code: "lushai", name: "lushai" }
 ]
 
 
@@ -68,6 +68,11 @@ export default function Chatbot(): React.JSX.Element {
   }, [currentDoc])
 
 
+  const startAssessment = async () => {
+    const res = await axios.get(`http://localhost:8080/assessment/generate_question?doc_name=${currentDoc}`)
+    sessionStorage.setItem("mcqs", JSON.stringify(res.data.questions))
+    router.push("/assessment")
+  }
 
 
   const getStorageKey = () =>
@@ -93,25 +98,12 @@ export default function Chatbot(): React.JSX.Element {
     if (storedDocs) {
       setDocs(JSON.parse(storedDocs))
     } else {
-      axios.get("http://localhost:8080/docs/").then(res => {
+      axios.get("http://localhost:8080/doc/").then(res => {
         setDocs(res.data.documents)
         localStorage.setItem("docChats", JSON.stringify(res.data.documents))
       })
     }
   }, [])
-
-  useEffect(() => {
-  const interval = setInterval(() => {
-    axios.post("http://localhost:8080/save/save/", {
-      doc_name: currentDoc ?? "general",
-      messages,
-    })
-    .then(() => console.log("Chat saved"))
-    .catch((err) => console.error("Failed to save chat", err))
-  }, 60000)
-
-  return () => clearInterval(interval)
-}, [messages, currentDoc])
 
   useEffect(() => {
     if (isLoading || isChunkLoading || messages.length > 0) {
@@ -138,7 +130,7 @@ export default function Chatbot(): React.JSX.Element {
       setMessages(prev => [...prev, { role: "assistant", content: res.data.answer }])
     } else {
       const res = await axios.post("http://localhost:8080/chatbot/", {
-        query: input,
+        message: input,
         language: selectedLanguage,  // <-- Also here if needed
       })
       setMessages(prev => [...prev, { role: "assistant", content: res.data.response }])
@@ -156,7 +148,7 @@ export default function Chatbot(): React.JSX.Element {
     setIsChunkLoading(true)
     try {
       const res = await axios.get(
-        `http://localhost:8080/learn/?doc_name=${currentDoc}&step=${step}`
+        `http://localhost:8080/learn/?doc_name=${currentDoc}&step=${step}&language=${selectedLanguage}`
       )
       const summary = res.data.summary
       setMessages(prev => [
@@ -283,9 +275,21 @@ export default function Chatbot(): React.JSX.Element {
 
       {/* Chat Window */}
       <div className="flex-1 flex flex-col">
-        <div className="border-b border-gray-700 px-6 py-4 bg-[#2a2a2e] text-lg font-bold flex items-center gap-2">
-          <Bot className="w-5 h-5" />
-          {currentDoc ? `AI Assstant - ${currentDoc.split("_").slice(1).join("_")}` : "AI Assistant"}
+        <div className="border-b border-gray-700 px-6 py-4 bg-[#2a2a2e] text-lg font-bold flex items-center gap-2 justify-between">
+          <div className="flex items-center gap-2 text-lg font-bold text-white">
+            <Bot className="w-5 h-5" />
+            {currentDoc
+              ? `AI Assistant - ${currentDoc.split("_").slice(1).join("_")}`
+              : "AI Assistant"}
+          </div>
+          {currentDoc && (
+            <button
+              onClick={startAssessment}
+              className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-1.5 rounded text-sm"
+            >
+              📝 Start Assessment
+            </button>
+          )}
         </div>
 
         {/* Messages */}
