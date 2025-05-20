@@ -12,11 +12,11 @@ from routes.learning_path import router as generate_learning_path
 from routes.save_chat import router as save_chat
 from pydantic import BaseModel
 from typing import List
-    
+
 app = FastAPI(debug=True)
 
 origins = [
-    "http://localhost:3000",
+    "*",
 ]
 
 app.add_middleware(
@@ -33,9 +33,9 @@ app.include_router(sample_get)
 app.include_router(upload_router, prefix="/upload")
 app.include_router(learn_router, prefix="/learn")
 app.include_router(ask_router, prefix="/ask")
-app.include_router(docs_router, prefix="/docs")
+app.include_router(docs_router, prefix="/doc")
 app.include_router(steps_count, prefix="/doc/count")
 app.include_router(generate_learning_path, prefix="/path")
 app.include_router(save_chat, prefix="/save")
 if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8080)
+    uvicorn.run(app, host="0.0.0.0", port=8080)
