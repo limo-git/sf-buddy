@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { FileText, MessageSquare, Clock, Heart } from "lucide-react"
+import Link from "next/link"
 
 export function HeroSection() {
   return (
@@ -17,9 +18,11 @@ export function HeroSection() {
             subject at your own pace.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 mb-12">
+            <Link href="/path">
             <Button size="lg" className="bg-orange-500 hover:bg-orange-600 text-white">
               Get Started
             </Button>
+            </Link>
             <Button size="lg" variant="outline" className="border-orange-500 text-orange-500 hover:bg-orange-950">
               Watch Demo
             </Button>

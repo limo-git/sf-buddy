@@ -27,7 +27,7 @@ export default function Home() {
             <Link href="#mental-health" className="text-gray-300 hover:text-white transition-colors">
               Mental Health
             </Link>
-            <Link href="/path" className="text-gray-300 hover:text-white transition-colors">
+            <Link href="#get-started" className="text-gray-300 hover:text-white transition-colors">
               Get Started
             </Link>
           </nav>
@@ -48,6 +48,7 @@ export default function Home() {
           <h2 className="text-3xl font-bold text-center mb-12">Key Features</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-white">
             <FeatureCard
+
               icon={<FileText className="h-10 w-10 text-orange-500" />}
               title="Personalized Learning Path"
               description="Upload your study materials and get a customized learning schedule tailored to your needs and availability."
