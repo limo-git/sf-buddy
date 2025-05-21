@@ -23,6 +23,9 @@ def answer_question(question: str, context_chunks: list[str], language: str) -> 
         
         Answer the question: "{question}"
         Please provide the answer in "{language}".
+    If the student shows any sign of distress, anxiety, confusion, or frustration in their question, 
+    please respond with empathy and provide supportive, reassuring guidance tailored to help the student overcome their difficulties.
+    
     """
     response = model.generate_content(prompt)
     return response.text
@@ -69,6 +72,7 @@ def assess_user(assessment: str):
     Below is a user's quiz attempt. For each question, their answer, the correct answer, and time taken are provided.
 
     Based on this, generate:
+    - Do not give any introduction in the beginning just tell the performance directly 
     - A summary of their overall performance
     - Areas where the user is strong and weak (by topic or type of question)
     - Suggestions for improvement

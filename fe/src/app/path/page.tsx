@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Loader2, Upload, FileText, Clock, Calendar } from "lucide-react"
 import { Slider } from "@/components/ui/slider"
 import ReactMarkdown from "react-markdown"
+import { useRouter } from "next/navigation" 
 
 
 export default function LearningPathForm() {
@@ -19,6 +20,7 @@ export default function LearningPathForm() {
   const [response, setResponse] = useState<any>(null)
   const [loading, setLoading] = useState(false)
   const [uploadLoading, setUploadLoading] = useState(false)
+  const router = useRouter()
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const selectedFile = e.target.files ? e.target.files[0] : null
@@ -91,11 +93,11 @@ export default function LearningPathForm() {
 
 
   return (
-    <div className="container mx-auto py-10 px-4">
-      <Card className="max-w-4xl mx-auto">
+    <div className="container mx-auto py-10 px-4 ">
+      <Card className="max-w-4xl mx-auto bg-[#2a2a2e] text-white">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold">Personalized Learning Path Generator</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-2xl text-white font-bold">Personalized Learning Path</CardTitle>
+          <CardDescription className="text-[#d3d3d3]">
             Upload your PDF and set your schedule to get a customized learning path
           </CardDescription>
         </CardHeader>
@@ -113,12 +115,12 @@ export default function LearningPathForm() {
                       type="file"
                       accept="application/pdf"
                       onChange={handleUpload}
-                      className="cursor-pointer"
+                      className="cursor-pointer text-[#d3d3d3]"
                       disabled={uploadLoading}
                     />
                     {uploadLoading && (
                       <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                        <Loader2 className="h-4 w-4 animate-spin text-white" />
                       </div>
                     )}
                   </div>
@@ -135,14 +137,15 @@ export default function LearningPathForm() {
               )}
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 text-white">
               <Label htmlFor="available-days" className="font-medium">
                 Available Days
               </Label>
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-muted-foreground" />
+              <div className="flex items-center gap-2 ">
+                <Calendar className="h-4 w-4 text-white" />
                 <Input
                   id="available-days"
+                  className="text-white"
                   placeholder="e.g. Mon,Wed,Fri"
                   value={availableDays}
                   onChange={(e) => setAvailableDays(e.target.value)}
@@ -158,13 +161,14 @@ export default function LearningPathForm() {
                     Hours per Day: {hoursPerDay}
                   </Label>
                   <div className="flex items-center gap-4 mt-2">
-                    <Clock className="h-4 w-4 text-muted-foreground" />
+                    <Clock className="h-4 w-4 text-white" />
                     <Slider
                       id="hours-per-day"
                       min={1}
                       max={12}
                       step={1}
                       value={[hoursPerDay]}
+                      className="[&_[role=slider]]:bg-white [&_[role=slider]]:border-white [&_[role=slider]]:shadow [&_[role=slider]]:shadow-white [&_[role=slider]]:hover:bg-white [&_[role=slider]]:focus:ring-white [&_[role=slider]]:focus-visible:ring-white"
                       onValueChange={(value) => setHoursPerDay(value[0])}
                     />
                     <span className="w-8 text-center">{hoursPerDay}</span>
@@ -178,13 +182,14 @@ export default function LearningPathForm() {
                     Total Days: {totalDays}
                   </Label>
                   <div className="flex items-center gap-4 mt-2">
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <Calendar className="h-4 w-4 text-white" />
                     <Slider
                       id="total-days"
                       min={1}
                       max={90}
                       step={1}
                       value={[totalDays]}
+                      className="[&_[role=slider]]:bg-white [&_[role=slider]]:border-white [&_[role=slider]]:shadow [&_[role=slider]]:shadow-white [&_[role=slider]]:hover:bg-white [&_[role=slider]]:focus:ring-white [&_[role=slider]]:focus-visible:ring-white"
                       onValueChange={(value) => setTotalDays(value[0])}
                     />
                     <span className="w-8 text-center">{totalDays}</span>
@@ -194,23 +199,25 @@ export default function LearningPathForm() {
             </div>
           </form>
         </CardContent>
-        <CardFooter className="flex flex-col space-y-4">
+        <CardFooter className="flex flex-col space-y-4 text-white">
           <Button type="submit" className="w-full" disabled={loading || !uploadedFilename} onClick={handleSubmit}>
             {loading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Generating Learning Path...
+                <div className="text-whtie">Generating Learning Path...</div>
+                
               </>
             ) : (
               <>
                 <Upload className="mr-2 h-4 w-4" />
-                Generate Learning Path
+                <div className="text-white">Generate Learning Path</div>
               </>
             )}
           </Button>
 
 {response && (
 
+      <>
             <Card className="w-full mt-6">
               <CardHeader>
                 <CardTitle>Your Personalized Learning Path</CardTitle>
@@ -263,8 +270,17 @@ export default function LearningPathForm() {
                     }}>{response}</ReactMarkdown>
                 </div>
               </CardContent>
+              
             </Card>
+            <Button
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                onClick={() => router.push("/chatbot")}
+              >
+                Let’s Begin
+              </Button>
+            </>
           )}
+          
         </CardFooter>
       </Card>
     </div>

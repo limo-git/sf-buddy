@@ -88,17 +88,17 @@ export default function AssessmentPage() {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-orange-100 to-yellow-100 p-6 flex flex-col items-center font-sans">
+    <div className="min-h-screen p-6 flex flex-col items-center font-sans">
       <h1 className="text-3xl font-bold text-orange-700 mb-8">📝 Knowledge Assessment</h1>
 
       {!showResults && currentQuestion && (
-        <div className="w-full max-w-2xl bg-white p-6 rounded-xl shadow-lg border border-orange-200 transition-all duration-300">
+        <div className="w-full max-w-2xl bg-[#2a2a2e] p-6 rounded-xl shadow-lg border border-orange-200 transition-all duration-300">
           <div className="flex justify-between items-center mb-3 text-sm text-orange-500 font-medium">
             <span>Question {current + 1} of {mcqs.length}</span>
             <span className="text-orange-600 font-bold">⏱ {timer}s</span>
           </div>
 
-          <p className="text-lg font-semibold text-gray-800 mb-4">{currentQuestion.question}</p>
+          <p className="text-lg font-semibold text-white mb-4">{currentQuestion.question}</p>
 
           <div className="space-y-3">
             {currentQuestion.options.map((opt: string, idx: number) => (
