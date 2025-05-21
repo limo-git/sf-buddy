@@ -14,28 +14,28 @@ interface Message {
 }
 
 const languages = [
-  { code: "hi", name: "Hindi" },
-  { code: "bn", name: "Bengali" },
-  { code: "te", name: "Telugu" },
-  { code: "mr", name: "Marathi" },
-  { code: "ta", name: "Tamil" },
-  { code: "ur", name: "Urdu" },
-  { code: "gu", name: "Gujarati" },
-  { code: "kn", name: "Kannada" },
-  { code: "or", name: "Odia" },
-  { code: "ml", name: "Malayalam" },
-  { code: "pa", name: "Punjabi" },
-  { code: "as", name: "Assamese" },
-  { code: "ma", name: "Maithili" },
-  { code: "bh", name: "Bhojpuri" },
-  { code: "sd", name: "Sindhi" },
-  { code: "km", name: "Khmer" }, // Khmer is not Indian, might skip or replace with Konkani (kok)
-  { code: "kok", name: "Konkani" },
-  { code: "ne", name: "Nepali" },
-  { code: "sy", name: "Sanskrit" }, // Usually "sa" is Sanskrit code
-  { code: "sa", name: "Sanskrit" },
-  { code: "dog", name: "Dogri" },
-  { code: "lus", name: "Lushai" } // Lushai (Mizo) might be represented as "lus"
+  { code: "hindi", name: "hindi" },
+  { code: "bengali", name: "bengali" },
+  { code: "telugu", name: "telugu" },
+  { code: "marathi", name: "marathi" },
+  { code: "tamil", name: "tamil" },
+  { code: "urdu", name: "urdu" },
+  { code: "gujarati", name: "gujarati" },
+  { code: "kannada", name: "kannada" },
+  { code: "odia", name: "odia" },
+  { code: "malayalam", name: "malayalam" },
+  { code: "punjabi", name: "punjabi" },
+  { code: "assamese", name: "assamese" },
+  { code: "maithili", name: "maithili" },
+  { code: "bhojpuri", name: "bhojpuri" },
+  { code: "sindhi", name: "sindhi" },
+  { code: "khmer", name: "khmer" },
+  { code: "konkani", name: "konkani" },
+  { code: "nepali", name: "nepali" },
+  { code: "sanskrit", name: "sanskrit" },
+  { code: "sanskrit", name: "sanskrit" },
+  { code: "dogri", name: "dogri" },
+  { code: "lushai", name: "lushai" }
 ]
 
 
@@ -53,7 +53,10 @@ export default function Chatbot(): React.JSX.Element {
   const [visitedSteps, setVisitedSteps] = useState<number[]>([])
   const [isChunkLoading, setIsChunkLoading] = useState(false)
   const [showChunkBar, setShowChunkBar] = useState(true)
-  const [selectedLanguage, setSelectedLanguage] = useState("en")
+  const [selectedLanguage, setSelectedLanguage] = useState("english")
+  const [isStarting, setIsStarting] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
+
 
 
 
@@ -68,6 +71,18 @@ export default function Chatbot(): React.JSX.Element {
   }, [currentDoc])
 
 
+  const startAssessment = async () => {
+    setIsStarting(true)
+    try {
+      const res = await axios.get(`http://localhost:8080/assessment/generate_question?doc_name=${currentDoc}`)
+      sessionStorage.setItem("mcqs", JSON.stringify(res.data.questions))
+      router.push("/assessment")
+    } catch(err) {
+      console.log(err)
+    } finally {
+      setIsStarting(false);
+    }
+  }
 
 
   const getStorageKey = () =>
@@ -93,25 +108,12 @@ export default function Chatbot(): React.JSX.Element {
     if (storedDocs) {
       setDocs(JSON.parse(storedDocs))
     } else {
-      axios.get("http://localhost:8080/docs/").then(res => {
+      axios.get("http://localhost:8080/doc/").then(res => {
         setDocs(res.data.documents)
         localStorage.setItem("docChats", JSON.stringify(res.data.documents))
       })
     }
   }, [])
-
-  useEffect(() => {
-  const interval = setInterval(() => {
-    axios.post("http://localhost:8080/save/save/", {
-      doc_name: currentDoc ?? "general",
-      messages,
-    })
-    .then(() => console.log("Chat saved"))
-    .catch((err) => console.error("Failed to save chat", err))
-  }, 60000)
-
-  return () => clearInterval(interval)
-}, [messages, currentDoc])
 
   useEffect(() => {
     if (isLoading || isChunkLoading || messages.length > 0) {
@@ -138,7 +140,7 @@ export default function Chatbot(): React.JSX.Element {
       setMessages(prev => [...prev, { role: "assistant", content: res.data.answer }])
     } else {
       const res = await axios.post("http://localhost:8080/chatbot/", {
-        query: input,
+        message: input,
         language: selectedLanguage,  // <-- Also here if needed
       })
       setMessages(prev => [...prev, { role: "assistant", content: res.data.response }])
@@ -156,7 +158,7 @@ export default function Chatbot(): React.JSX.Element {
     setIsChunkLoading(true)
     try {
       const res = await axios.get(
-        `http://localhost:8080/learn/?doc_name=${currentDoc}&step=${step}`
+        `http://localhost:8080/learn/?doc_name=${currentDoc}&step=${step}&language=${selectedLanguage}`
       )
       const summary = res.data.summary
       setMessages(prev => [
@@ -187,16 +189,23 @@ export default function Chatbot(): React.JSX.Element {
     const file = e.target.files?.[0]
     if (!file) return
 
-    const formData = new FormData()
-    formData.append("file", file)
+    setIsUploading(true)
+    try {
+      const formData = new FormData()
+      formData.append("file", file)
 
-    const res = await axios.post("http://localhost:8080/upload/", formData)
-    const newDoc = res.data.filename
+      const res = await axios.post("http://localhost:8080/upload/", formData)
+      const newDoc = res.data.filename
 
-    const updated = [...docs, newDoc]
-    setDocs(updated)
-    localStorage.setItem("docChats", JSON.stringify(updated))
-    router.push(`/chatbot?doc=${encodeURIComponent(newDoc)}`)
+      const updated = [...docs, newDoc]
+      setDocs(updated)
+      localStorage.setItem("docChats", JSON.stringify(updated))
+      router.push(`/chatbot?doc=${encodeURIComponent(newDoc)}`)
+    } catch (err) {
+      console.error("Upload failed:", err)
+    } finally {
+      setIsUploading(false)
+    }
   }
 
   const handleClearChat = () => {
@@ -273,9 +282,21 @@ export default function Chatbot(): React.JSX.Element {
 
         {/* Upload */}
         <div className="mt-auto flex flex-col gap-3">
-          <label className="cursor-pointer flex items-center gap-2 text-sm text-gray-300 hover:text-green-400">
-            <FilePlus className="w-4 h-4" />
-            Upload New Document
+          <label className={`cursor-pointer flex items-center gap-2 text-sm ${isUploading ? "text-gray-400" : "text-gray-300 hover:text-green-400"}`}>
+            {isUploading ? (
+              <>
+                <svg className="animate-spin h-4 w-4 text-green-500" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+                Uploading...
+              </>
+            ) : (
+              <>
+                <FilePlus className="w-4 h-4" />
+                Upload New Document
+              </>
+            )}
             <input type="file" accept="application/pdf" onChange={handleUpload} className="hidden" />
           </label>
         </div>
@@ -283,9 +304,34 @@ export default function Chatbot(): React.JSX.Element {
 
       {/* Chat Window */}
       <div className="flex-1 flex flex-col">
-        <div className="border-b border-gray-700 px-6 py-4 bg-[#2a2a2e] text-lg font-bold flex items-center gap-2">
-          <Bot className="w-5 h-5" />
-          {currentDoc ? `AI Assstant - ${currentDoc.split("_").slice(1).join("_")}` : "AI Assistant"}
+        <div className="border-b border-gray-700 px-6 py-4 bg-[#2a2a2e] text-lg font-bold flex items-center gap-2 justify-between">
+          <div className="flex items-center gap-2 text-lg font-bold text-white">
+            <Bot className="w-5 h-5" />
+            {currentDoc
+              ? `AI Assistant - ${currentDoc.split("_").slice(1).join("_")}`
+              : "AI Assistant"}
+          </div>
+          {currentDoc && (
+            <button
+              onClick={startAssessment}
+              disabled={isStarting}
+              className={`flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-4 py-1.5 rounded text-sm ${isStarting ? "opacity-70 cursor-not-allowed" : ""}`}
+            >
+              {isStarting ? (
+                <>
+                  <svg className="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="white" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="white" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Generating...
+                </>
+              ) : (
+                <>
+                  📝 Start Assessment
+                </>
+              )}
+            </button>
+          )}
         </div>
 
         {/* Messages */}

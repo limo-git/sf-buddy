@@ -10,6 +10,7 @@ from routes.docs import router as docs_router
 from routes.steps_count import router as steps_count
 from routes.learning_path import router as generate_learning_path
 from routes.save_chat import router as save_chat
+from routes.assessment import router as generate_questions
 from pydantic import BaseModel
 from typing import List
 
@@ -37,5 +38,6 @@ app.include_router(docs_router, prefix="/doc")
 app.include_router(steps_count, prefix="/doc/count")
 app.include_router(generate_learning_path, prefix="/path")
 app.include_router(save_chat, prefix="/save")
+app.include_router(generate_questions, prefix="/assessment")
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8080)
