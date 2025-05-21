@@ -79,9 +79,17 @@ export default function LearningPathForm() {
       }
 
       const data = await res.json()
-      console.log("API Response:", data) 
       setResponse(data.learning_path)
-      console.log("Learning path text:", response)
+      await fetch("/api/send-email", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    subject: "Your Personalized Learning Path",
+    text: `Available Days: ${availableDays}\n\nLearning Path:\n${data.learning_path}`,
+    html: `<p><strong>Available Days:</strong> ${availableDays}</p><pre>${data.learning_path}</pre>`,
+  }),
+});
+
 
     } catch (error) {
       console.error("API request failed:", error)

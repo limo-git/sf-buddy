@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import axios from "axios"
 import ReactMarkdown from "react-markdown"
 
+
 export default function AssessmentPage() {
   const [mcqs, setMcqs] = useState<any[]>([])
   const [current, setCurrent] = useState(0)
@@ -57,27 +58,37 @@ export default function AssessmentPage() {
   const currentQuestion = mcqs[current]
 
   const analyzePerformance = async () => {
-    setIsAnalyzing(true)
-    setFeedback("")
+  setIsAnalyzing(true)
+  setFeedback("")
 
-    const payload = mcqs.map((q, i) => ({
-        question: q.question,
-        correct_answer: q.answer,
-        user_answer: userAnswers[i] || "Not answered",
-        time_taken: timePerQuestion[i] || threshold
-    }))
+  const payload = mcqs.map((q, i) => ({
+    question: q.question,
+    correct_answer: q.answer,
+    user_answer: userAnswers[i] || "Not answered",
+    time_taken: timePerQuestion[i] || threshold,
+  }))
 
-    try {
-        const res = await axios.post("http://localhost:8080/assessment/analyze_performance", {
-          questions: payload
-        })
-        setFeedback(res.data.analysis)
-    } catch (err) {
-        setFeedback("❌ Failed to get performance analysis.")
-    } finally {
-        setIsAnalyzing(false)
-    }
+  try {
+    const res = await axios.post("http://localhost:8080/assessment/analyze_performance", {
+      questions: payload,
+    })
+    setFeedback(res.data.analysis)
+
+    // Get score
+    const score = Object.keys(userAnswers).filter(i => mcqs[i]?.answer === userAnswers[+i]).length
+
+    // Send mail after feedback is ready
+    await axios.post("/api/send-results", {
+      score,
+      total: mcqs.length,
+      feedback: res.data.analysis,
+    })
+  } catch (err) {
+    setFeedback("❌ Failed to get performance analysis or send mail.")
+  } finally {
+    setIsAnalyzing(false)
   }
+}
 
   useEffect(() => {
     if (showResults && mcqs.length > 0 && Object.keys(userAnswers).length > 0 && feedback === "") {
@@ -102,14 +113,14 @@ export default function AssessmentPage() {
 
           <div className="space-y-3">
             {currentQuestion.options.map((opt: string, idx: number) => (
-              <label key={idx} className="block bg-yellow-50 hover:bg-yellow-100 p-3 rounded-md cursor-pointer border border-yellow-200">
+              <label key={idx} className="block bg-yellow-50 text-black hover:bg-yellow-100 p-3 rounded-md cursor-pointer border border-yellow-200">
                 <input
                   type="radio"
                   name={`q${current}`}
                   value={opt}
                   checked={userAnswers[current] === opt}
                   onChange={() => handleAnswer(opt)}
-                  className="mr-2"
+                  className="mr-2 text-black"
                 />
                 {opt}
               </label>
