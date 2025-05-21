@@ -1,113 +1,258 @@
-import Image from 'next/image'
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Clock, Brain, FileText, MessageSquare, Heart } from "lucide-react"
+import { HeroSection } from "@/components/hero-section"
+import { FeatureCard } from "@/components/feature-card"
+import { LanguageSelector } from "@/components/language-selector"
+import { MentalHealthCard } from "@/components/mental-health-card"
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <div className="flex items-center p-4 bg-[#030712] justify-center w-full h-full">
+    <div className="min-h-screen bg-gray-950 p-4 text-gray-100">
+      <header className="border-b border-gray-800 py-4">
+        <div className="container flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Brain className="h-8 w-8 text-orange-500" />
+            <span className="text-xl font-bold">EduSmart AI</span>
+          </div>
+          <nav className="hidden md:flex items-center gap-6">
+            <Link href="#features" className="text-gray-300 hover:text-white transition-colors">
+              Features
+            </Link>
+            <Link href="#languages" className="text-gray-300 hover:text-white transition-colors">
+              Languages
+            </Link>
+            <Link href="#mental-health" className="text-gray-300 hover:text-white transition-colors">
+              Mental Health
+            </Link>
+            <Link href="/path" className="text-gray-300 hover:text-white transition-colors">
+              Get Started
+            </Link>
+          </nav>
+          <div className="flex items-center gap-3">
+            <LanguageSelector />
+            <Button variant="outline" className="border-orange-500 text-orange-500 hover:bg-orange-950">
+              Sign In
+            </Button>
+            <Button className="bg-orange-500 hover:bg-orange-600 text-white">Sign Up</Button>
+          </div>
         </div>
-      </div>
+      </header>
 
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
+      <HeroSection />
 
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
+      <section id="features" className="py-20 bg-[#030712]">
+        <div className="container">
+          <h2 className="text-3xl font-bold text-center mb-12">Key Features</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-white">
+            <FeatureCard
+              icon={<FileText className="h-10 w-10 text-orange-500" />}
+              title="Personalized Learning Path"
+              description="Upload your study materials and get a customized learning schedule tailored to your needs and availability."
+            />
+            <FeatureCard
+              icon={<MessageSquare className="h-10 w-10 text-orange-500" />}
+              title="Tutor Mode"
+              description="Get step-by-step guidance and explanations for complex topics in a conversational interface."
+            />
+            <FeatureCard
+              icon={<Clock className="h-10 w-10 text-orange-500" />}
+              title="Interactive Quizzes"
+              description="Test your knowledge with time-bound quizzes that adapt to your learning progress."
+            />
+            <FeatureCard
+              icon={<Heart className="h-10 w-10 text-orange-500" />}
+              title="Mental Health Support"
+              description="Receive timely nudges and support for managing stress and anxiety during your learning journey."
+            />
+          </div>
+        </div>
+      </section>
+
+      <section id="demo" className="py-20 bg-gray-950">
+        <div className="container">
+          <h2 className="text-3xl font-bold text-center mb-12">Experience EduSmart AI</h2>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <Card className="bg-gray-900 border-gray-800">
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <FileText className="h-6 w-6 text-orange-500" />
+                  <CardTitle className="text-white">Personalized Learning Path</CardTitle>
+                </div>
+                <CardDescription className="text-gray-400">
+                  Upload your PDF and set your schedule to get a customized learning path
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="p-4 rounded-lg bg-gray-800">
+                    <h3 className=" text-white font-medium mb-2">Quadratic Equations Learning Schedule</h3>
+                    <div className="space-y-3 text-sm text-white">
+                      <div className="text-white">
+                        <p className="text-orange-400">Day 1 (Monday - 2 hours)</p>
+                        <ul className="list-disc list-inside pl-4 text-gray-300">
+                          <li>Introduction to Quadratic Equations</li>
+                          <li>Understanding the standard form: ax² + bx + c = 0</li>
+                        </ul>
+                      </div>
+                      <div>
+                        <p className="text-orange-400">Day 2 (Tuesday - 2 hours)</p>
+                        <ul className="list-disc list-inside pl-4 text-gray-300">
+                          <li>Solving Quadratic Equations by Factorization</li>
+                          <li>Factoring quadratic expressions</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Link href="/path" className="w-full">
+    <Button className="w-full bg-orange-500 hover:bg-orange-600">
+      Generate Learning Path
+    </Button>
+  </Link>
+
+              </CardFooter>
+            </Card>
+
+            <Card className="bg-gray-900 border-gray-800">
+              <CardHeader>
+                <div className="flex items-center gap-2 text-white">
+                  <Clock className="h-6 w-6 text-orange-500" />
+                  <CardTitle className="text-white">Knowledge Assessment</CardTitle>
+                </div>
+                <CardDescription className="text-gray-400">
+                  Test your understanding with interactive time-bound quizzes
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="p-4 rounded-lg bg-gray-800 text-white">
+                  <div className="flex justify-between items-center mb-4">
+                    <p className="text-sm text-gray-400">Question 1 of 20</p>
+                    <div className="flex items-center gap-1 text-orange-400">
+                      <Clock className="h-4 w-4" />
+                      <span>59s</span>
+                    </div>
+                  </div>
+                  <h3 className="font-medium mb-4">
+                    Which of the following is NOT a method to solve quadratic equations discussed in the text?
+                  </h3>
+                  <div className="space-y-2">
+                    {[
+                      "Solution by factorisation",
+                      "Solution by completing the square",
+                      "Solution using a formula",
+                      "Solution by differentiation",
+                    ].map((option, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center p-3 rounded-lg border border-gray-700 hover:bg-gray-700/50 cursor-pointer"
+                      >
+                        <div className="h-4 w-4 rounded-full border border-gray-500 mr-3"></div>
+                        <span>{option}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+              <CardFooter>
+                
+              </CardFooter>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      <section id="languages" className="py-20 bg-gray-900">
+        <div className="container">
+          <h2 className="text-3xl font-bold text-center mb-4">Supports 22 Indian Languages</h2>
+          <p className="text-center text-gray-400 max-w-2xl mx-auto mb-12">
+            Learn in your preferred language with our multilingual support system
           </p>
-        </a>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            {[
+              "Hindi",
+              "Bengali",
+              "Telugu",
+              "Marathi",
+              "Tamil",
+              "Urdu",
+              "Gujarati",
+              "Kannada",
+              "Odia",
+              "Punjabi",
+              "Malayalam",
+              "Assamese",
+              "Maithili",
+              "Sanskrit",
+              "Kashmiri",
+              "Nepali",
+              "Konkani",
+              "Sindhi",
+              "Bodo",
+              "Dogri",
+              "Manipuri",
+              "Santhali",
+            ].map((language, index) => (
+              <div key={index} className="p-3 bg-gray-800 rounded-lg text-center hover:bg-gray-700 transition-colors">
+                {language}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
+      <section id="mental-health" className="py-20 bg-gray-950">
+        <div className="container">
+          <h2 className="text-3xl font-bold text-center mb-12 text-white">Mental Health Support</h2>
+          <MentalHealthCard />
+        </div>
+      </section>
 
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore the Next.js 13 playground.
+      <section id="get-started" className="py-20 bg-gradient-to-b from-gray-900 to-gray-950">
+        <div className="container text-center">
+          <h2 className="text-3xl font-bold mb-4">Ready to Transform Your Learning Experience?</h2>
+          <p className="text-gray-400 max-w-2xl mx-auto mb-8">
+            Join thousands of students who have improved their learning outcomes with EduSmart AI's personalized
+            approach.
           </p>
-        </a>
+          <Button size="lg" className="bg-orange-500 hover:bg-orange-600 text-white px-8">
+            Get Started for Free
+          </Button>
+        </div>
+      </section>
 
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+      <footer className="bg-gray-950 border-t border-gray-800 py-12">
+        <div className="container">
+          <div className="flex flex-col md:flex-row justify-between items-center">
+            <div className="flex items-center gap-2 mb-6 md:mb-0">
+              <Brain className="h-8 w-8 text-orange-500" />
+              <span className="text-xl font-bold">EduSmart AI</span>
+            </div>
+            <div className="flex flex-wrap justify-center gap-8">
+              <Link href="#" className="text-gray-400 hover:text-white transition-colors">
+                Privacy Policy
+              </Link>
+              <Link href="#" className="text-gray-400 hover:text-white transition-colors">
+                Terms of Service
+              </Link>
+              <Link href="#" className="text-gray-400 hover:text-white transition-colors">
+                Contact Us
+              </Link>
+              <Link href="#" className="text-gray-400 hover:text-white transition-colors">
+                FAQ
+              </Link>
+            </div>
+          </div>
+          <div className="mt-8 text-center text-gray-500 text-sm">
+            © {new Date().getFullYear()} LearnMate AI. All rights reserved.
+          </div>
+        </div>
+      </footer>
+    </div>
+    </div>
   )
 }
